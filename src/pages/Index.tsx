@@ -1,14 +1,15 @@
-
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import MainLayout from '@/components/MainLayout';
 import { Logo } from '@/components/Logo';
-import { FileText, CheckCircle, ArrowRight } from 'lucide-react';
+import { FileText, CheckCircle, ArrowRight, Camera } from 'lucide-react';
+import { useState } from 'react';
 
 export default function LandingPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isCapturing, setIsCapturing] = useState(false);
 
   const handleCTAClick = () => {
     if (user) {
@@ -18,10 +19,27 @@ export default function LandingPage() {
     }
   };
 
+  const takeScreenshot = async () => {
+    setIsCapturing(true);
+    try {
+      const canvas = await html2canvas(document.body, {
+        scale: 2,
+        useCORS: true,
+      });
+      const link = document.createElement('a');
+      link.download = 'briefme-landing-page.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    } catch (error) {
+      console.error('Screenshot capture failed', error);
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
   return (
     <MainLayout>
-      <div className="py-12 md:py-20">
-        {/* Hero section */}
+      <div className="py-12 md:py-20 relative">
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
           <div className="mb-6">
             <Logo size="lg" />
@@ -87,7 +105,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Features section */}
         <div className="mt-24 max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">
             Projetado para <span className="text-briefme-primary">freelancers</span>
@@ -153,6 +170,17 @@ export default function LandingPage() {
               <ArrowRight size={18} />
             </Button>
           </div>
+        </div>
+
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={takeScreenshot} 
+            disabled={isCapturing}
+          >
+            <Camera size={20} />
+          </Button>
         </div>
       </div>
     </MainLayout>
